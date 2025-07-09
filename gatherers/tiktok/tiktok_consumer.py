@@ -1,25 +1,11 @@
 # tiktok_consumer.py
 
-from gatherers.tiktok.tiktok_gatherer import gather_tiktok_data
+from tiktok_gatherer import gather_tiktok_data
 from kafka import KafkaConsumer, KafkaProducer
 import json
 import time
 
-def simulate_tiktok_scrape(keyword, project_key):
-   
-    print(f"[TikTok Gatherer] Scraping keyword '{keyword}' for project '{project_key}'...")
-    
-    # Simulate 3 fake posts
-    return [
-        {
-            "project_key": project_key,
-            "keyword": keyword,
-            "source": "tiktok",
-            "url": f"https://www.tiktok.com/@example_{i}_{keyword}",
-            "timestamp": time.time()
-        }
-        for i in range(3)
-    ]
+
 
 def main():
     print("[TikTok Consumer] Starting...")
@@ -33,6 +19,7 @@ def main():
 
     producer = KafkaProducer(
         bootstrap_servers="kafka:9092",
+         api_version=(0,11,5),
         value_serializer=lambda x: json.dumps(x).encode("utf-8")
     )
 

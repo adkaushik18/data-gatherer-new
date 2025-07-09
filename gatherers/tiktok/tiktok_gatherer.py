@@ -4,7 +4,7 @@ import shlex
 import traceback
 import requests
 from typing import List
-from gatherers.tiktok.tiktok_apify import TikTokScraper
+from tiktok_apify import TikTokScraper
 from kafka import  KafkaProducer
 
 
@@ -12,6 +12,7 @@ from kafka import  KafkaProducer
 tiktok_manager = TikTokScraper()
 producer = KafkaProducer(
         bootstrap_servers="kafka:9092",
+        api_version=(0,11,5),
         value_serializer=lambda x: json.dumps(x).encode("utf-8")
     )
 
@@ -97,11 +98,11 @@ def gather_tiktok_data(hashtags: List[str], keywords: List[str]):
 
 
 def main(params):    
-    posts = gather_tiktok_data(hashtags=params.get("hashtags", []),keywords=params.get("keywords", []),project_key=params.get("project_key", []))    
+    posts = gather_tiktok_data(hashtags=params.get("hashtags", []),keywords=params.get("keywords", []))    
     producer.send(
             "gathered_data",
             {
-                "project_key": params.get("project_key", []),
+                "project_key": params.get("project_key",''),
                 "source": "tiktok",
                 "posts": posts
             }
@@ -114,7 +115,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="TikTok Scraper Runner")
     parser.add_argument("--hashtags", nargs="*", default=[], help="List of hashtags to scrape")
     parser.add_argument("--keywords", nargs="*", default=[], help="List of search keywords")
-    parser.add_argument("--project_key", nargs="*", default=[], help="Project key for the TikTok gatherer")   
+    parser.add_argument("--project_key", nargs="*", default='', help="Project key for the TikTok gatherer")   
   
 
     args = parser.parse_args()

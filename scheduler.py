@@ -5,6 +5,7 @@ from visible_db_connection import VisibleDbConnection
 db_conn = VisibleDbConnection()
 producer = KafkaProducer(
     bootstrap_servers='kafka:9092',
+     api_version=(0,11,5),
     value_serializer=lambda x: json.dumps(x).encode('utf-8')
 )
 

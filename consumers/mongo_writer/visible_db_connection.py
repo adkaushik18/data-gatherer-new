@@ -2,6 +2,7 @@ import os
 import uuid
 import requests
 import json
+from retry import retry
 
 from config import DB_API_URL, EMAIL, PASSWORD 
 

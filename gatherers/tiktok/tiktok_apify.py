@@ -3,7 +3,7 @@ from typing import List, Literal, Optional
 import os
 
 from apify_client import ApifyClientAsync
-from gatherers.tiktok.config import APIFY_TOKEN
+from config import APIFY_TOKEN
 
 
 print(f"Running __name__ = {__name__}")
