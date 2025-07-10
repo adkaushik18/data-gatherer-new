@@ -19,3 +19,8 @@ for message in consumer:
             row=post,
             project=project_key
         )
+
+
+if __name__ == "__main__":
+    print("Mongo Writer started and listening for messages...")
+    

@@ -7,9 +7,8 @@ from typing import List
 from tiktok_apify import TikTokScraper
 from kafka import  KafkaProducer
 
-
-
 tiktok_manager = TikTokScraper()
+
 producer = KafkaProducer(
         bootstrap_servers="kafka:9092",
         api_version=(0,11,5),
@@ -98,7 +97,9 @@ def gather_tiktok_data(hashtags: List[str], keywords: List[str]):
 
 
 def main(params):    
-    posts = gather_tiktok_data(hashtags=params.get("hashtags", []),keywords=params.get("keywords", []))    
+    posts = gather_tiktok_data(hashtags=params.get("hashtags", []),keywords=params.get("keywords", []))
+    print(f"[TikTok Gatherer] Gathered {len(posts)} posts for project {params.get('project_key','')}")
+    print(f"[TikTok Gatherer] Sending gathered data for project {params.get('project_key','')} to Kafka...")  
     producer.send(
             "gathered_data",
             {
@@ -125,5 +126,6 @@ if __name__ == "__main__":
         "keywords": args.keywords,
         "project_key": args.project_key       
     }
+    print(f"[TikTok Gatherer] Starting with params: {params}")
 
     main(params)

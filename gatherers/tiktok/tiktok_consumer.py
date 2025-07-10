@@ -13,13 +13,14 @@ def main():
     consumer = KafkaConsumer(
         "gather_tasks",
         bootstrap_servers="kafka:9092",
+        api_version=(0,11,5),        
         value_deserializer=lambda x: json.loads(x.decode("utf-8")),
         group_id="tiktok_gatherer_group"
     )
 
     producer = KafkaProducer(
         bootstrap_servers="kafka:9092",
-         api_version=(0,11,5),
+        api_version=(0,11,5),
         value_serializer=lambda x: json.dumps(x).encode("utf-8")
     )
 
@@ -35,6 +36,9 @@ def main():
 
        
         posts = gather_tiktok_data(hashtags=hashtags, keywords=keywords, project_key=project_key)
+        print(f"[TikTok Consumer] Gathered {len(posts)} posts for project {project_key}")
+        print(f"[TikTok Consumer] Sending gathered data for project {project_key} to Kafka...")
+        print(f"[TikTok Consumer] Posts: {posts}")  
         producer.send(
             "gathered_data",
             {

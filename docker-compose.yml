@@ -2,15 +2,11 @@ version: "3.9"
 
 services:
 
-  zookeeper:
-    image: bitnami/zookeeper:latest
-    ports:
-      - "2181:2181"
-    environment:
-      ALLOW_ANONYMOUS_LOGIN: "yes"
-
   kafka:
     image: bitnami/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
     environment:
       KAFKA_CFG_NODE_ID: 1
       KAFKA_CFG_PROCESS_ROLES: controller,broker
@@ -19,31 +15,49 @@ services:
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-    depends_on:
-      - zookeeper
+      KAFKA_KRAFT_CLUSTER_ID: kraft-cluster-id-1
+      ALLOW_PLAINTEXT_LISTENER: yes
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: always
+
+  # kafka-ui:
+  #   image: provectuslabs/kafka-ui:latest
+  #   container_name: kafka-ui
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - KAFKA_CLUSTERS_0_NAME=local
+  #     - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+  #   depends_on:
+  #     kafka:
+  #       condition: service_healthy
 
   app:
     build:
       context: .           
       dockerfile: Dockerfile
     depends_on:
-      - kafka
-    command: python scheduler.py
+      kafka:
+        condition: service_healthy
     env_file:
       - .env
     network_mode: host
-    restart: always               
+    restart: always
 
   tiktok_gatherer:
     build:
       context: ./gatherers/tiktok
       dockerfile: Dockerfile
-    network_mode: host
     depends_on:
-      - kafka
-    command: python tiktok_gatherer.py
+      kafka:
+        condition: service_healthy
     env_file:
       - ./gatherers/tiktok/.env
+    network_mode: host
     restart: always
 
   mongo_writer:
@@ -51,8 +65,8 @@ services:
       context: ./consumers/mongo_writer
       dockerfile: Dockerfile
     depends_on:
-      - kafka
-    command: python mongo_writer.py
+      kafka:
+        condition: service_healthy
     env_file:
       - .env
     network_mode: host

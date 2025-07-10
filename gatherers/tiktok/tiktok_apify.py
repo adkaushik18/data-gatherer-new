@@ -6,9 +6,6 @@ from apify_client import ApifyClientAsync
 from config import APIFY_TOKEN
 
 
-print(f"Running __name__ = {__name__}")
-
-
 class TikTokScraper:
     def __init__(self):
         self.TOKEN = APIFY_TOKEN      
@@ -101,4 +98,5 @@ class TikTokScraper:
 
             
     
-
+if __name__ == "__main__":
+    print("Apify class for TikTok scraping initialized.")
